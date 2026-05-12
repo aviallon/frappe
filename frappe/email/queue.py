@@ -48,11 +48,10 @@ def get_emails_sent_today(email_account=None):
 			`tabEmail Queue`
 		WHERE
 			`status` in ('Sent', 'Not Sent', 'Sending')
-			AND
-			`creation` > (NOW() - INTERVAL '24' HOUR)
+			AND `creation` > %(since)s
 	"""
 
-	q_args = {}
+	q_args = {"since": now_datetime() - timedelta(hours=24)}
 	if email_account is not None:
 		if email_account:
 			q += " AND email_account = %(email_account)s"
