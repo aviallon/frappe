@@ -75,6 +75,14 @@ class MariaDB(Base, MySQLQuery):
 		return super().from_(table, *args, **kwargs)
 
 
+class FrappePostgreSQLQueryBuilder(PostgreSQLQueryBuilder):
+	def _force_index_sql(self, **kwargs):
+		return ""
+
+	def _use_index_sql(self, **kwargs):
+		return ""
+
+
 class Postgres(Base, PostgreSQLQuery):
 	field_translation = types.MappingProxyType({"table_name": "relname", "table_rows": "n_tup_ins"})
 	schema_translation = types.MappingProxyType({"tables": "pg_stat_all_tables"})
@@ -87,10 +95,10 @@ class Postgres(Base, PostgreSQLQuery):
 	# they are two different objects. The quick fix used here is to replace the
 	# Field names in the "Field" function.
 
-	_BuilderClasss = PostgreSQLQueryBuilder
+	_BuilderClasss = FrappePostgreSQLQueryBuilder
 
 	@classmethod
-	def _builder(cls, *args, **kwargs) -> "PostgreSQLQueryBuilder":
+	def _builder(cls, *args, **kwargs) -> "FrappePostgreSQLQueryBuilder":
 		return super()._builder(*args, wrapper_cls=ParameterizedValueWrapper, **kwargs)
 
 	@classmethod
