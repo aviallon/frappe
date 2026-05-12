@@ -9,6 +9,7 @@ from psycopg2.errorcodes import (
 	DEADLOCK_DETECTED,
 	DUPLICATE_COLUMN,
 	INSUFFICIENT_PRIVILEGE,
+	SERIALIZATION_FAILURE,
 	STRING_DATA_RIGHT_TRUNCATION,
 	UNDEFINED_COLUMN,
 	UNDEFINED_TABLE,
@@ -56,7 +57,7 @@ class PostgresExceptionUtil:
 
 	@staticmethod
 	def is_deadlocked(e):
-		return getattr(e, "pgcode", None) == DEADLOCK_DETECTED
+		return getattr(e, "pgcode", None) in (DEADLOCK_DETECTED, SERIALIZATION_FAILURE)
 
 	@staticmethod
 	def is_timedout(e):

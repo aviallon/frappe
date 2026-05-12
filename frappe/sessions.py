@@ -427,21 +427,28 @@ class Session:
 			self.data.data.lang = str(frappe.lang)
 			self.data.data.session_ip = frappe.local.request_ip
 
-			Sessions = frappe.qb.DocType("Sessions")
-			# update sessions table
-			(
-				frappe.qb.update(Sessions)
-				.where(Sessions.sid == self.data["sid"])
-				.set(
-					Sessions.sessiondata,
-					frappe.as_json(self.data["data"], indent=None, separators=(",", ":")),
-				)
-				.set(Sessions.lastupdate, now)
-			).run()
+			try:
+				Sessions = frappe.qb.DocType("Sessions")
+				# update sessions table
+				(
+					frappe.qb.update(Sessions)
+					.where(Sessions.sid == self.data["sid"])
+					.set(
+						Sessions.sessiondata,
+						frappe.as_json(self.data["data"], indent=None, separators=(",", ":")),
+					)
+					.set(Sessions.lastupdate, now)
+				).run()
 
-			frappe.db.set_value("User", frappe.session.user, "last_active", now, update_modified=False)
+				frappe.db.set_value("User", frappe.session.user, "last_active", now, update_modified=False)
 
-			frappe.db.commit(chain=True)
+				frappe.db.commit(chain=True)
+			except frappe.QueryDeadlockError:
+				# PostgreSQL's repeatable-read isolation can abort concurrent updates
+				# to the same session row. Session persistence is best-effort here;
+				# keep the request successful and let the next request refresh it.
+				frappe.db.rollback(chain=True)
+				return False
 			updated_in_db = True
 			frappe.cache.hset("session", self.sid, self.data)
 
