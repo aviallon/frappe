@@ -47,11 +47,10 @@ class SubmissionQueue(Document):
 
 	@staticmethod
 	def clear_old_logs(days=30):
-		from frappe.query_builder import Interval
-		from frappe.query_builder.functions import Now
+		from frappe.utils import add_days, now_datetime
 
 		table = frappe.qb.DocType("Submission Queue")
-		frappe.db.delete(table, filters=(table.creation < (Now() - Interval(days=days))))
+		frappe.db.delete(table, filters=(table.creation < add_days(now_datetime(), -days)))
 
 	def insert(self, to_be_queued_doc: Document, action: str):
 		self.status = "Queued"

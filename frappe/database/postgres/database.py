@@ -573,3 +573,4 @@ def replace_locate_with_strpos(query):
 	if LOCATE_QUERY_PATTERN.search(query):
 		query = LOCATE_SUB_PATTERN.sub(r"strpos(\2\3, \1)", query)
 	return query
+

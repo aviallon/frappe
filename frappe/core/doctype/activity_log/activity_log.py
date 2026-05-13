@@ -5,7 +5,7 @@ import frappe
 from frappe.core.utils import set_timeline_doc
 from frappe.model.document import Document
 from frappe.query_builder import DocType, Interval
-from frappe.query_builder.functions import Now
+from frappe.utils import add_days, now_datetime
 from frappe.utils import get_fullname, now, strip_html
 
 
@@ -60,7 +60,7 @@ class ActivityLog(Document):
 		if not days:
 			days = 90
 		doctype = DocType("Activity Log")
-		frappe.db.delete(doctype, filters=(doctype.creation < (Now() - Interval(days=days))))
+		frappe.db.delete(doctype, filters=(doctype.creation < add_days(now_datetime(), -days)))
 
 
 def on_doctype_update():

@@ -3,8 +3,7 @@
 
 import frappe
 from frappe.model.document import Document
-from frappe.query_builder import Interval
-from frappe.query_builder.functions import Now
+from frappe.utils import add_days, now_datetime
 
 
 class ErrorLog(Document):
@@ -41,7 +40,7 @@ class ErrorLog(Document):
 	@staticmethod
 	def clear_old_logs(days=30):
 		table = frappe.qb.DocType("Error Log")
-		frappe.db.delete(table, filters=(table.creation < (Now() - Interval(days=days))))
+		frappe.db.delete(table, filters=(table.creation < add_days(now_datetime(), -days)))
 
 
 @frappe.whitelist()

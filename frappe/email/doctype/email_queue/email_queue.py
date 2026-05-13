@@ -21,8 +21,7 @@ from frappe.email.frappemail import FrappeMail
 from frappe.email.queue import get_unsubcribed_url, get_unsubscribe_message
 from frappe.email.smtp import SMTPServer
 from frappe.model.document import Document
-from frappe.query_builder import DocType, Interval
-from frappe.query_builder.functions import Now
+from frappe.query_builder import DocType
 from frappe.utils import (
 	add_days,
 	cint,
@@ -31,6 +30,7 @@ from frappe.utils import (
 	get_string_between,
 	get_url,
 	now,
+	now_datetime,
 	nowdate,
 	sbool,
 	split_emails,
@@ -265,10 +265,11 @@ class EmailQueue(Document):
 		days = days or 31
 		email_queue = frappe.qb.DocType("Email Queue")
 		email_recipient = frappe.qb.DocType("Email Queue Recipient")
+		cutoff = add_days(now_datetime(), -days)
 
 		# Delete queue table
 		(
-			frappe.qb.from_(email_queue).delete().where(email_queue.creation < (Now() - Interval(days=days)))
+			frappe.qb.from_(email_queue).delete().where(email_queue.creation < cutoff)
 		).run()
 
 		# delete child tables, note that this has potential to leave some orphan
@@ -277,7 +278,7 @@ class EmailQueue(Document):
 		(
 			frappe.qb.from_(email_recipient)
 			.delete()
-			.where(email_recipient.creation < (Now() - Interval(days=days)))
+			.where(email_recipient.creation < cutoff)
 		).run()
 
 

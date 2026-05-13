@@ -44,11 +44,10 @@ class NotificationLog(Document):
 
 	@staticmethod
 	def clear_old_logs(days=180):
-		from frappe.query_builder import Interval
-		from frappe.query_builder.functions import Now
+		from frappe.utils import add_days, now_datetime
 
 		table = frappe.qb.DocType("Notification Log")
-		frappe.db.delete(table, filters=(table.creation < (Now() - Interval(days=days))))
+		frappe.db.delete(table, filters=(table.creation < add_days(now_datetime(), -days)))
 
 
 def get_permission_query_conditions(for_user):
